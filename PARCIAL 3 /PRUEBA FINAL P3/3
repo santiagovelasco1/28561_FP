@@ -1,1 +1,119 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
+int main(){
+
+    int minimo, maximo, secreto;
+    int maxIntentos;
+    int intento;
+    int i, j;
+    int repetido;
+    int adivino = 0;
+    int matriz[10][3];
+
+    // RF01 - CONFIGURACIÓN DINÁMICA DEL RANGO
+
+    printf("Ingrese el valor minimo: ");
+    scanf("%d", &minimo);
+
+    printf("Ingrese el valor maximo: ");
+    scanf("%d", &maximo);
+
+    while(maximo <= minimo){
+        printf("Rango invalido. Ingrese nuevamente el valor maximo: ");
+        scanf("%d", &maximo);
+    }
+
+    // RF02 - CONFIGURACIÓN DINÁMICA DE INTENTOS
+
+    printf("Ingrese el numero maximo de intentos (1-10): ");
+    scanf("%d", &maxIntentos);
+
+    while(maxIntentos < 1 || maxIntentos > 10){
+        printf("Intentos invalidos. Ingrese nuevamente: ");
+        scanf("%d", &maxIntentos);
+    }
+
+    srand(time(NULL));
+    secreto = rand() % (maximo - minimo + 1) + minimo;
+
+    // RF03 y RF04
+
+    for(i = 0; i < maxIntentos; i++){
+
+        printf("\nIntento %d: ", i + 1);
+        scanf("%d", &intento);
+
+        while(intento < minimo || intento > maximo){
+            printf("Numero fuera de rango. Ingrese nuevamente: ");
+            scanf("%d", &intento);
+        }
+
+        repetido = 0;
+
+        for(j = 0; j < i; j++){
+            if(matriz[j][1] == intento){
+                repetido = 1;
+            }
+        }
+
+        if(repetido == 1){
+            printf("Numero repetido. Intente con otro.\n");
+            i--;
+            continue;
+        }
+
+        // RF04 - Registro en la matriz
+
+        matriz[i][0] = i + 1;
+        matriz[i][1] = intento;
+
+        if(intento < secreto){
+            matriz[i][2] = 0;
+            printf("Muy bajo\n");
+        }
+        else if(intento > secreto){
+            matriz[i][2] = 1;
+            printf("Muy alto\n");
+        }
+        else{
+            matriz[i][2] = 2;
+            printf("Correcto\n");
+            adivino = 1;
+            break;
+        }
+    }
+
+    // RF05 - Visualización de resumen detallado
+
+    printf("\n=========================================\n");
+    printf("         RESUMEN DE LA PARTIDA\n");
+    printf("=========================================\n");
+    printf("Intento\tNumero\tResultado\n");
+
+    for(j = 0; j <= i && j < maxIntentos; j++){
+
+        printf("%d\t%d\t", matriz[j][0], matriz[j][1]);
+
+        if(matriz[j][2] == 0){
+            printf("Muy bajo\n");
+        }
+        else if(matriz[j][2] == 1){
+            printf("Muy alto\n");
+        }
+        else{
+            printf("Correcto\n");
+        }
+    }
+
+    if(adivino == 1){
+        printf("\n¡Felicidades! Adivinaste el numero secreto: %d\n", secreto);
+    }
+    else{
+        printf("\nNo lograste adivinar el numero.\n");
+        printf("El numero secreto era: %d\n", secreto);
+    }
+
+    return 0;
+}
