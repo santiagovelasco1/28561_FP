@@ -2,17 +2,23 @@
 #include <stdlib.h>
 #include <time.h>
 
-int main(){
-
-    int minimo, maximo, secreto;
-    int maxIntentos;
+int main()
+{
+    int minimo, maximo;
+    int secreto;
+    int intentosMax;
     int intento;
+    int matriz[10][3];
     int i, j;
     int repetido;
     int adivino = 0;
-    int matriz[10][3];
 
-    // RF01 - CONFIGURACIÓN DINÁMICA DEL RANGO
+    srand(time(NULL));
+
+    // ===========================
+    // RF01: Configuración dinámica del rango
+    // El usuario ingresa el valor mínimo y máximo.
+    // ===========================
 
     printf("Ingrese el valor minimo: ");
     scanf("%d", &minimo);
@@ -20,99 +26,144 @@ int main(){
     printf("Ingrese el valor maximo: ");
     scanf("%d", &maximo);
 
-    while(maximo <= minimo){
-        printf("Rango invalido. Ingrese nuevamente el valor maximo: ");
+    while(minimo >= maximo)
+    {
+        printf("\nERROR. El minimo debe ser menor que el maximo.\n");
+
+        printf("Ingrese el valor minimo: ");
+        scanf("%d", &minimo);
+
+        printf("Ingrese el valor maximo: ");
         scanf("%d", &maximo);
     }
 
-    // RF02 - CONFIGURACIÓN DINÁMICA DE INTENTOS
-
-    printf("Ingrese el numero maximo de intentos (1-10): ");
-    scanf("%d", &maxIntentos);
-
-    while(maxIntentos < 1 || maxIntentos > 10){
-        printf("Intentos invalidos. Ingrese nuevamente: ");
-        scanf("%d", &maxIntentos);
-    }
-
-    srand(time(NULL));
     secreto = rand() % (maximo - minimo + 1) + minimo;
 
-    // RF03 y RF04
+    // ===========================
+    // RF02: Configuración dinámica de intentos
+    // El usuario selecciona la cantidad de intentos (1-10).
+    // ===========================
 
-    for(i = 0; i < maxIntentos; i++){
+    printf("\nCantidad maxima de intentos (1-10): ");
+    scanf("%d", &intentosMax);
 
-        printf("\nIntento %d: ", i + 1);
-        scanf("%d", &intento);
+    while(intentosMax < 1 || intentosMax > 10)
+    {
+        printf("Valor incorrecto. Ingrese un valor entre 1 y 10: ");
+        scanf("%d", &intentosMax);
+    }
 
-        while(intento < minimo || intento > maximo){
-            printf("Numero fuera de rango. Ingrese nuevamente: ");
+    for(i=0; i<intentosMax; i++)
+    {
+        do
+        {
+            repetido = 0;
+
+            printf("\nIntento %d: ", i+1);
             scanf("%d", &intento);
-        }
 
-        repetido = 0;
+            // ===========================
+            // RF03: Validación del rango
+            // Verifica que el número esté dentro del rango.
+            // ===========================
 
-        for(j = 0; j < i; j++){
-            if(matriz[j][1] == intento){
+            if(intento < minimo || intento > maximo)
+            {
+                printf("Numero fuera del rango.\n");
                 repetido = 1;
+                continue;
             }
-        }
 
-        if(repetido == 1){
-            printf("Numero repetido. Intente con otro.\n");
-            i--;
-            continue;
-        }
+            // ===========================
+            // RF03: Validación de duplicados
+            // Verifica que el número no haya sido ingresado antes.
+            // ===========================
 
-        // RF04 - Registro en la matriz
+            for(j=0; j<i; j++)
+            {
+                if(intento == matriz[j][1])
+                {
+                    repetido = 1;
+                    printf("Numero repetido.\n");
+                    break;
+                }
+            }
+
+        }while(repetido == 1);
+
+        // ===========================
+        // RF04: Registro de intentos en matriz
+        // Columna 0 = Número de intento
+        // Columna 1 = Valor ingresado
+        // Columna 2 = Resultado
+        // 0 = Bajo
+        // 1 = Alto
+        // 2 = Correcto
+        // ===========================
 
         matriz[i][0] = i + 1;
         matriz[i][1] = intento;
 
-        if(intento < secreto){
+        if(intento < secreto)
+        {
             matriz[i][2] = 0;
-            printf("Muy bajo\n");
+            printf("Muy bajo.\n");
         }
-        else if(intento > secreto){
+        else if(intento > secreto)
+        {
             matriz[i][2] = 1;
-            printf("Muy alto\n");
+            printf("Muy alto.\n");
         }
-        else{
+        else
+        {
             matriz[i][2] = 2;
-            printf("Correcto\n");
+            printf("Correcto.\n");
             adivino = 1;
+            i++;
             break;
         }
     }
 
-    // RF05 - Visualización de resumen detallado
+    // ===========================
+    // RF05: Visualización del resumen
+    // Muestra la tabla con todos los intentos
+    // y el resultado textual.
+    // ===========================
 
     printf("\n=========================================\n");
-    printf("         RESUMEN DE LA PARTIDA\n");
+    printf("RESUMEN DE INTENTOS\n");
     printf("=========================================\n");
     printf("Intento\tNumero\tResultado\n");
 
-    for(j = 0; j <= i && j < maxIntentos; j++){
-
+    for(j=0; j<i; j++)
+    {
         printf("%d\t%d\t", matriz[j][0], matriz[j][1]);
 
-        if(matriz[j][2] == 0){
-            printf("Muy bajo\n");
-        }
-        else if(matriz[j][2] == 1){
-            printf("Muy alto\n");
-        }
-        else{
-            printf("Correcto\n");
-        }
+        if(matriz[j][2] == 0)
+            printf("Bajo");
+
+        if(matriz[j][2] == 1)
+            printf("Alto");
+
+        if(matriz[j][2] == 2)
+            printf("Correcto");
+
+        printf("\n");
     }
 
-    if(adivino == 1){
-        printf("\n¡Felicidades! Adivinaste el numero secreto: %d\n", secreto);
-    }
-    else{
-        printf("\nNo lograste adivinar el numero.\n");
+    // ===========================
+    // RF05: Si el usuario no adivina,
+    // revelar el número secreto.
+    // ===========================
+
+    if(adivino == 0)
+    {
+        printf("\nNo adivinaste el numero.\n");
         printf("El numero secreto era: %d\n", secreto);
+    }
+    else
+    {
+        printf("\nFelicidades. Adivinaste el numero.\n");
     }
 
     return 0;
